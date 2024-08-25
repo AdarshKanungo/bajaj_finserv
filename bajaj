@@ -1,0 +1,60 @@
+import React, { useState } from 'react';
+import axios from 'axios';
+
+function MyApp() {
+    const [inputJson, setInputJson] = useState('');
+    const [apiResponse, setApiResponse] = useState(null);
+    const [errorMessage, setErrorMessage] = useState('');
+    const [selectedFilters, setSelectedFilters] = useState([]);
+
+    const handleFormSubmit = async () => {
+        try {
+            const parsedData = JSON.parse(inputJson);
+            const response = await axios.post('https://your-backend-url.com/bfhl', parsedData);
+            setApiResponse(response.data);
+            setErrorMessage('');
+        } catch (error) {
+            setErrorMessage('Error: Invalid JSON format or API request failed');
+        }
+    };
+
+    const displayResponse = () => {
+        if (!apiResponse) return null;
+        let filteredData = {};
+        if (selectedFilters.includes('Alphabets')) {
+            filteredData.alphabets = apiResponse.alphabets;
+        }
+        if (selectedFilters.includes('Numbers')) {
+            filteredData.numbers = apiResponse.numbers;
+        }
+        if (selectedFilters.includes('Highest lowercase alphabet')) {
+            filteredData.highestLowercaseAlphabet = apiResponse.highestLowercaseAlphabet;
+        }
+        return <pre>{JSON.stringify(filteredData, null, 2)}</pre>;
+    };
+
+    return (
+        <div>
+            <h1>{'Student Roll Number'}</h1>
+            <textarea 
+                value={inputJson} 
+                onChange={(e) => setInputJson(e.target.value)} 
+                placeholder="Paste your JSON here" 
+            />
+            <button onClick={handleFormSubmit}>Submit Data</button>
+            {errorMessage && <p>{errorMessage}</p>}
+            {apiResponse && (
+                <>
+                    <select multiple={true} onChange={(e) => setSelectedFilters([...e.target.selectedOptions].map(option => option.value))}>
+                        <option value="Alphabets">Alphabets</option>
+                        <option value="Numbers">Numbers</option>
+                        <option value="Highest lowercase alphabet">Highest lowercase alphabet</option>
+                    </select>
+                    {displayResponse()}
+                </>
+            )}
+        </div>
+    );
+}
+
+export default MyApp;
